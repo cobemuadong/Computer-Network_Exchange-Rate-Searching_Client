@@ -65,6 +65,9 @@ void CClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDT_PASS, _edt_password);
 	DDX_Control(pDX, IDC_IP, _ip_address);
 	DDX_Control(pDX, IDC_EDT_PORT, _edt_port);
+	DDX_Control(pDX, IDC_LOGIN, _button_login);
+	DDX_Control(pDX, IDC_REGISTER, _button_register);
+	DDX_Control(pDX, IDC_CONNECT, _button_connect);
 }
 
 BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
@@ -111,6 +114,9 @@ BOOL CClientDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	GetDlgItem(IDC_IP)->SetWindowTextW(_T("127.0.0.1"));
 	GetDlgItem(IDC_EDT_PORT)->SetWindowTextW(_T("1234"));
+
+	_button_login.EnableWindow(FALSE);
+	_button_register.EnableWindow(FALSE);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -203,6 +209,7 @@ bool CClientDlg::InitialSocket(const char* ipAddress, int port)
 	int connResult = connect(sock, (sockaddr*)&hint, sizeof(hint));
 	if (connResult == SOCKET_ERROR)
 	{
+		//int to CString
 		CString t;
 		t.Format(_T("%d"), WSAGetLastError());
 		MessageBox(_T("Can't connect to server, Err #") + t, 0, MB_ICONERROR);
@@ -289,11 +296,17 @@ void CClientDlg::OnBnClickedConnect()
 		}
 		else
 		{
-			MainDlg main;
+			GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Connect Successful"));
+			_ip_address.EnableWindow(FALSE);
+			_edt_port.EnableWindow(FALSE);
+			_button_login.EnableWindow(TRUE);
+			_button_register.EnableWindow(TRUE);
+			_button_connect.EnableWindow(FALSE);
+			/*MainDlg main;
 			main.sock = sock;
 			theApp.m_pMainWnd = &main;
 			EndDialog(IDOK);
-			main.DoModal();
+			main.DoModal();*/
 		}
 	}
 }

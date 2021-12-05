@@ -46,6 +46,9 @@ public:
 	SOCKET sock = INVALID_SOCKET;
 	afx_msg void OnBnClickedConnect();
 	CEdit _edt_port;
+	CButton _button_login;
+	CButton _button_register;
+	CButton _button_connect;
 };
 
 // your declarations here

@@ -76,6 +76,8 @@ BOOL CClientApp::InitInstance()
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 
+	
+
 	if (nResponse == IDOK)
 	{
 		// TODO: Place code here to handle when the dialog is
