@@ -29,3 +29,9 @@
 //		}
 //	} while (userInput.size() > 0);
 //}
+
+
+int sum()
+{
+	return 1 + 2;
+}
