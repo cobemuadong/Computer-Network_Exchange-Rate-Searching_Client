@@ -25,4 +25,5 @@ public:
 	SOCKET sock;
 	void received();
 	afx_msg void OnBnClickedSend();
+	afx_msg void OnClose();
 };

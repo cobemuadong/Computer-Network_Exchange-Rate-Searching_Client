@@ -228,33 +228,60 @@ bool CClientDlg::InitialSocket(const char* ipAddress, int port)
 	return true;
 }
 
+int CClientDlg::SendMsg(CString& msg)
+{
+	int len = msg.GetLength();
+	char sendBuff[4096];
+	ZeroMemory(sendBuff, 4096);
+	strcpy_s(sendBuff, CStringA(msg).GetString());
+	//Maybe send length?
+	int BytesSent = send(sock, sendBuff, len, 0);
+	if (BytesSent < 0)
+		return 0;
+	return 1;
+}
+
+int CClientDlg::RecvMsg(char*& msg)
+{
+	msg = new char[4096];
+	int bytesReceived = recv(sock, msg, 4096, 0);
+	if (bytesReceived == SOCKET_ERROR)
+		return 0;
+	else
+		return 1;
+}
+
 void CClientDlg::OnBnClickedLogin()
 {
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
 	// TODO: Add your control notification handler code here
-	CString user_str;
-	CString pass_str;
+	CString _user;
+	CString _pass;
 
-	CString input_name;
-	CString input_pass;
 
-	_edt_username.GetWindowText(input_name);
-	_edt_password.GetWindowText(input_pass);
+	_edt_username.GetWindowText(_user);
+	_edt_password.GetWindowText(_pass);
 
-	bool is_login = false;
-	if (input_name.CompareNoCase(user_str) == 0)
+	//Send tag
+	SendMsg(_user);
+	SendMsg(_pass);
+	
+	char* isLogin = NULL;
+	RecvMsg(isLogin);
+	if (strcmp(isLogin, "1") == 0)
 	{
-		if (input_pass.Compare(pass_str) == 0)
-		{
-			is_login = true;
-		}
+		delete[]isLogin;
+		MainDlg main;
+		main.sock = sock;
+		theApp.m_pMainWnd = &main;
+		EndDialog(IDOK);
+		main.DoModal();
 	}
-
-	if (is_login)
+	else
 	{
-		//MainDlg main_dlg;
-		//main_dlg.DoModal();
+		delete[]isLogin;
+		AfxMessageBox(_T("Wrong username or password!\nPlease check again"));
 	}
 }
 
@@ -263,8 +290,8 @@ void CClientDlg::OnBnClickedRegister()
 {
 	// TODO: Add your control notification handler code here
 	RegisterDlg rgt;
+	rgt.sock = sock;
 	rgt.DoModal();
-
 }
 
 
@@ -302,11 +329,7 @@ void CClientDlg::OnBnClickedConnect()
 			_button_login.EnableWindow(TRUE);
 			_button_register.EnableWindow(TRUE);
 			_button_connect.EnableWindow(FALSE);
-			/*MainDlg main;
-			main.sock = sock;
-			theApp.m_pMainWnd = &main;
-			EndDialog(IDOK);
-			main.DoModal();*/
+			
 		}
 	}
 }

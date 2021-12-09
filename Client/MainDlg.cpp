@@ -31,6 +31,7 @@ void MainDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(MainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_SEND, &MainDlg::OnBnClickedSend)
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -98,4 +99,13 @@ void MainDlg::OnBnClickedSend()
 	//		_list_msg.AddString(_T("message received!"));
 	//	}
 	//}
+}
+
+
+void MainDlg::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+	shutdown(sock, 0);
+	closesocket(sock);
+	CDialogEx::OnClose();
 }

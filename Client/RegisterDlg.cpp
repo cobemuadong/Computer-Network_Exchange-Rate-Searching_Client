@@ -5,6 +5,7 @@
 #include "Client.h"
 #include "RegisterDlg.h"
 #include "afxdialogex.h"
+#include "ClientDlg.h"
 
 
 // RegisterDlg dialog
@@ -31,14 +32,37 @@ void RegisterDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(RegisterDlg, CDialogEx)
-	ON_BN_CLICKED(IDC_BUTTON1, &RegisterDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON1, &RegisterDlg::OnBnClickedRegister)
 END_MESSAGE_MAP()
 
 
 // RegisterDlg message handlers
 
+int	RegisterDlg::SendMsg(CString& msg)
+{
+	int len = msg.GetLength();
+	char sendBuff[4096];
+	ZeroMemory(sendBuff, 4096);
+	strcpy_s(sendBuff, CStringA(msg).GetString());
+	//Maybe send length?
+	int BytesSent = send(sock, sendBuff, len, 0);
+	if (BytesSent < 0)
+		return 0;
+	return 1;
+}
 
-void RegisterDlg::OnBnClickedButton1()
+int RegisterDlg::RecvMsg(char* msg)
+{
+	msg = new char[4096];
+	int bytesReceived = recv(sock, msg, 4096, 0);
+	delete[]msg;
+	if (bytesReceived == SOCKET_ERROR)
+		return 0;
+	else
+		return 1;
+}
+
+void RegisterDlg::OnBnClickedRegister()
 {
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
@@ -62,6 +86,8 @@ void RegisterDlg::OnBnClickedButton1()
 	if (check == true)
 	{
 		//To do
+		SendMsg(input_user);
+		SendMsg(input_password);
 		EndDialog(0);
 	}
 }

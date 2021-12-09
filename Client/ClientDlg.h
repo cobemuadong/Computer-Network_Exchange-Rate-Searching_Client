@@ -49,6 +49,8 @@ public:
 	CButton _button_login;
 	CButton _button_register;
 	CButton _button_connect;
+	int SendMsg(CString& msg);
+	int RecvMsg(char*& msg);
 };
 
 // your declarations here
