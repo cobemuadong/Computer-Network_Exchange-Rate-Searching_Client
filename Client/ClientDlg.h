@@ -41,9 +41,10 @@ protected:
 public:
 	afx_msg void OnBnClickedRegister();
 	CEdit _ip_address;
-
 	bool InitialSocket(const char* ipAddress, int port, SOCKET& sock);
 	SOCKET sClient = INVALID_SOCKET;
+	WSAData wsaData;	// Winsock auto implement this data by the version we passed (ver)
+	sockaddr_in hint;
 	afx_msg void OnBnClickedConnect();
 	CEdit _edt_port;
 	CButton _button_login;

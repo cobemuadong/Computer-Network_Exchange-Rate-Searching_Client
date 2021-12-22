@@ -27,6 +27,8 @@ public:
 	
 public: 
 	SOCKET sClient = INVALID_SOCKET;
+	WSAData wsaData;
+	sockaddr_in hint;
 	CComboBox _combox1;
 	CComboBox _combox2;
 	CComboBox _combox3;

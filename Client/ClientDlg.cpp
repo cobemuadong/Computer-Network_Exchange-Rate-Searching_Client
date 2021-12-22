@@ -176,7 +176,6 @@ HCURSOR CClientDlg::OnQueryDragIcon()
 bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET& sock)
 {							// Listening port
 	// Initialize winsock
-	WSAData wsaData;	// Winsock auto implement this data by the version we passed (ver)
 	WORD ver = MAKEWORD(2, 2);	//version 
 	int wsResult = WSAStartup(ver, &wsaData);
 	if (wsResult != 0)
@@ -200,7 +199,6 @@ bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET& sock)
 	}
 
 	// Fill in a hint structure
-	sockaddr_in hint;
 	hint.sin_family = AF_INET;			// TCP
 	hint.sin_port = htons(port);		// host (byte order) to network (byte order) short	
 	int iResult = inet_pton(AF_INET, ipAddress, &hint.sin_addr);// Convert string to IP Address(numeric binary form) (inet_pton)
@@ -329,6 +327,8 @@ void CClientDlg::OnBnClickedLogin()
 	if (isLogin.Compare(_T("1")) == 0)
 	{
 		MainDlg main;
+		main.wsaData = wsaData;
+		main.hint = hint;
 		main.sClient = sClient;
 		theApp.m_pMainWnd = &main;
 		EndDialog(0);
