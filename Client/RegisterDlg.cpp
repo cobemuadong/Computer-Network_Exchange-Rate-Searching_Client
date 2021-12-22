@@ -106,6 +106,8 @@ void RegisterDlg::OnBnClickedRegister()
 	_edt_rg_password.GetWindowText(input_password);
 	_edt_rg_re_password.GetWindowText(input_re_password);
 
+	mSend(_T("1"));
+
 	bool check = false;
 	if (input_password.Compare(input_re_password) == 0)
 	{
