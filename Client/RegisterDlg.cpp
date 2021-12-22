@@ -93,40 +93,6 @@ int RegisterDlg::mRecv(CString& StrRecv)
 	}
 }
 
-CString RegisterDlg::mRecv()
-{
-	int buffLen;
-	int buffReceived = recv(sClient, (char*)&buffLen, sizeof(int), 0);
-	if (buffReceived < 0)
-		return NULL;
-	buffLen += 1;
-	CHAR* temp = new CHAR[buffLen];
-	ZeroMemory(temp, buffLen);
-	int bytesReceived = recv(sClient, temp, buffLen, 0);
-	if (bytesReceived < 0)
-	{
-		delete[]temp;
-		return NULL;
-	}
-	else
-	{
-		int wchar_num = MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), NULL, 0);
-		if (wchar_num <= 0)
-			return NULL;
-		wchar_t* wstr = new wchar_t[wchar_num + 1];
-		ZeroMemory(wstr, wchar_num);
-		if (!wstr)
-		{
-			return NULL;
-		}
-		MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), wstr, wchar_num);
-		wstr[wchar_num] = '\0';
-		CString X = wstr;
-		delete[] wstr;
-		delete[] temp;
-		return X;
-	}
-}
 
 void RegisterDlg::OnBnClickedRegister()
 {
