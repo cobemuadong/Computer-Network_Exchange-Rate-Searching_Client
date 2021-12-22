@@ -42,15 +42,17 @@ public:
 	afx_msg void OnBnClickedRegister();
 	CEdit _ip_address;
 
-	bool InitialSocket(const char* ipAddress, int port);
-	SOCKET sock = INVALID_SOCKET;
+	bool InitialSocket(const char* ipAddress, int port, SOCKET& sock);
+	SOCKET sClient = INVALID_SOCKET;
 	afx_msg void OnBnClickedConnect();
 	CEdit _edt_port;
 	CButton _button_login;
 	CButton _button_register;
 	CButton _button_connect;
-	int SendMsg(CString& msg);
-	int RecvMsg(char*& msg);
+	int mSend(CString& msg);
+	CString mRecv();
+	afx_msg void OnClose();
+
 };
 
 // your declarations here

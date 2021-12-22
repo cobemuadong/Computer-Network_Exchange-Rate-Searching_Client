@@ -1,4 +1,4 @@
-
+﻿
 // ClientDlg.cpp : implementation file
 //
 
@@ -77,6 +77,7 @@ BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_LOGIN, &CClientDlg::OnBnClickedLogin)
 	ON_BN_CLICKED(IDC_REGISTER, &CClientDlg::OnBnClickedRegister)
 	ON_BN_CLICKED(IDC_CONNECT, &CClientDlg::OnBnClickedConnect)
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -118,6 +119,7 @@ BOOL CClientDlg::OnInitDialog()
 	_button_login.EnableWindow(FALSE);
 	_button_register.EnableWindow(FALSE);
 
+	_button_connect.SetButtonStyle(BS_DEFPUSHBUTTON);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -170,21 +172,23 @@ HCURSOR CClientDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-bool CClientDlg::InitialSocket(const char* ipAddress, int port)
+bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET&sock)
 {							// Listening port
 	// Initialize winsock
-	WSAData wsaData;
-	WORD ver = MAKEWORD(2, 2);					//version 
+	WSAData wsaData;	// Winsock auto implement this data by the version we passed (ver)
+	WORD ver = MAKEWORD(2, 2);	//version 
 	int wsResult = WSAStartup(ver, &wsaData);
 	if (wsResult != 0)
 	{
-		MessageBox(_T("Can't star winsock, Err #%d", wsResult), 0, MB_ICONERROR);
+		MessageBox(_T("Can't star winsock, Err #", wsResult), 0, MB_ICONERROR);//print the error code in msg box
 		WSACleanup();
 		return false;
 	}
 
+	//Enough data for destination. Next step	 
 	// Create socket
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+	sock = socket(AF_INET, SOCK_STREAM, 0); //IPv4 - TCP/IP - Protocol use in transport layer
+						//Protocol is passed by '0' so service provider will be choose the protocol to be use
 	if (sock == INVALID_SOCKET)
 	{
 		CString t;
@@ -197,9 +201,10 @@ bool CClientDlg::InitialSocket(const char* ipAddress, int port)
 	// Fill in a hint structure
 	sockaddr_in hint;
 	hint.sin_family = AF_INET;			// TCP
-	hint.sin_port = htons(port);
-	int iResult = inet_pton(AF_INET, ipAddress, &hint.sin_addr);
-	if (iResult == -1 || iResult == 0)// Convert string to IP Address
+	hint.sin_port = htons(port);		// host (byte order) to network (byte order) short	
+	int iResult = inet_pton(AF_INET, ipAddress, &hint.sin_addr);// Convert string to IP Address(numeric binary form) (inet_pton)
+																// and assign to sin_addr
+	if (iResult == -1 || iResult == 0)
 	{
 		MessageBox(_T("Wrong IP!!!"), 0, MB_ICONERROR);
 		return false;
@@ -228,27 +233,67 @@ bool CClientDlg::InitialSocket(const char* ipAddress, int port)
 	return true;
 }
 
-int CClientDlg::SendMsg(CString& msg)
+int CClientDlg::mSend(CString& msg)
 {
 	int len = msg.GetLength();
-	char sendBuff[4096];
-	ZeroMemory(sendBuff, 4096);
-	strcpy_s(sendBuff, CStringA(msg).GetString());
-	//Maybe send length?
-	int BytesSent = send(sock, sendBuff, len, 0);
-	if (BytesSent < 0)
+	int bufLen = send(sClient, (char*)&len, sizeof(int), 0);
+	if (bufLen <= 0)
 		return 0;
-	return 1;
-}
-
-int CClientDlg::RecvMsg(char*& msg)
-{
-	msg = new char[4096];
-	int bytesReceived = recv(sock, msg, 4096, 0);
-	if (bytesReceived == SOCKET_ERROR)
+	int bytesSent = send(sClient, CStringA(msg), len, 0);
+	if (bytesSent <= 0)
 		return 0;
 	else
-		return 1;
+		return bytesSent;
+	int wstr_len = (int)wcslen(msg);
+	int num_chars = WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, NULL, 0, NULL, NULL);
+	CHAR* strTo = new CHAR[num_chars + 1];
+	if (strTo)
+	{
+		WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, strTo, num_chars, NULL, NULL);
+		strTo[num_chars] = '\0';
+	}
+	int buffSent=send(sClient, (char*)&num_chars, sizeof(int), 0);
+	if (buffSent <= 0)
+		return 0;
+	int bytesSent = send(sClient, strTo, num_chars, 0);
+	if (bytesSent <= 0)
+		return 0;
+	return bytesSent;
+}
+
+CString CClientDlg::mRecv()
+{
+	int buffLen;
+	int buffReceived = recv(sClient, (char*)&buffLen, sizeof(int), 0);
+	if (buffReceived < 0)
+		return NULL;
+	buffLen += 1;
+	CHAR* temp = new CHAR[buffLen];
+	ZeroMemory(temp, buffLen);
+	int bytesReceived = recv(sClient, temp, buffLen, 0);
+	if (bytesReceived < 0)
+	{
+		delete[]temp;
+		return NULL;
+	}
+	else
+	{
+		int wchar_num = MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), NULL, 0);
+		if (wchar_num <= 0)
+			return NULL;
+		wchar_t* wstr = new wchar_t[wchar_num + 1];
+		ZeroMemory(wstr, wchar_num);
+		if (!wstr)
+		{
+			return NULL;
+		}
+		MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), wstr, wchar_num);
+		wstr[wchar_num] = '\0';
+		CString X = wstr;
+		delete[]wstr;
+		delete[]temp;
+		return X;
+	}
 }
 
 void CClientDlg::OnBnClickedLogin()
@@ -258,29 +303,48 @@ void CClientDlg::OnBnClickedLogin()
 	// TODO: Add your control notification handler code here
 	CString _user;
 	CString _pass;
-
-
 	_edt_username.GetWindowText(_user);
 	_edt_password.GetWindowText(_pass);
 
-	//Send tag
-	SendMsg(_user);
-	SendMsg(_pass);
-	
-	char* isLogin = NULL;
-	RecvMsg(isLogin);
-	if (strcmp(isLogin, "1") == 0)
+	if (_user == "" || _pass == "")
 	{
-		delete[]isLogin;
+		return;
+	}
+
+	//Send tag
+	if (mSend(_user) == 0)
+	{
+		AfxMessageBox(_T("Cannot connect to server! "));
+		GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Connect"));
+		_ip_address.EnableWindow(TRUE);
+		_edt_port.EnableWindow(TRUE);
+		_button_login.EnableWindow(FALSE);
+		_button_register.EnableWindow(FALSE);
+		_button_connect.EnableWindow(TRUE);
+		return;
+	}
+	if (mSend(_pass) == 0)
+	{
+		AfxMessageBox(_T("Cannot connect to server! "));
+		GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Connect"));
+		_ip_address.EnableWindow(TRUE);
+		_edt_port.EnableWindow(TRUE);
+		_button_login.EnableWindow(FALSE);
+		_button_register.EnableWindow(FALSE);
+		_button_connect.EnableWindow(TRUE);
+		return;
+	}
+	CString isLogin = mRecv();
+	if (isLogin == _T("Lê Văn Đạt"))
+	{
 		MainDlg main;
-		main.sock = sock;
+		main.sClient = sClient;
 		theApp.m_pMainWnd = &main;
-		EndDialog(IDOK);
+		EndDialog(0);
 		main.DoModal();
 	}
 	else
 	{
-		delete[]isLogin;
 		AfxMessageBox(_T("Wrong username or password!\nPlease check again"));
 	}
 }
@@ -290,10 +354,9 @@ void CClientDlg::OnBnClickedRegister()
 {
 	// TODO: Add your control notification handler code here
 	RegisterDlg rgt;
-	rgt.sock = sock;
+	rgt.sock = sClient;
 	rgt.DoModal();
 }
-
 
 void CClientDlg::OnBnClickedConnect()
 {
@@ -311,25 +374,31 @@ void CClientDlg::OnBnClickedConnect()
 	// Convert to char*
 	CStringA temp(ip_temp);
 	const char* ip = temp;
-
 	// Convert to int
 	int port = _tstoi(port_temp);
 
-	if (InitialSocket(ip, port))
+	if (InitialSocket(ip, port, sClient))
 	{
-		if (sock == INVALID_SOCKET)
+		if (sClient == INVALID_SOCKET)
 		{
-			MessageBox(_T("deo on!"));
+			MessageBox(_T("Cannot connect to server! Please try again"),_T("Error"));
 		}
 		else
 		{
-			GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Connect Successful"));
+			GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Sucessfully connected"));
 			_ip_address.EnableWindow(FALSE);
 			_edt_port.EnableWindow(FALSE);
 			_button_login.EnableWindow(TRUE);
 			_button_register.EnableWindow(TRUE);
 			_button_connect.EnableWindow(FALSE);
-			
 		}
 	}
+}
+
+
+void CClientDlg::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+	closesocket(sClient);
+	CDialogEx::OnClose();
 }

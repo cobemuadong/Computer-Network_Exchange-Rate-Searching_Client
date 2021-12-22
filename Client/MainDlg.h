@@ -1,5 +1,5 @@
 #pragma once
-
+#include <vector>
 
 // MainDlg dialog
 
@@ -13,7 +13,7 @@ public:
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_MAIN };
+	enum { IDD = IDD_MAINDLG };
 #endif
 
 protected:
@@ -21,9 +21,16 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	CListBox _list_msg;
-	SOCKET sock;
-	void received();
-	afx_msg void OnBnClickedSend();
+	virtual BOOL OnInitDialog();
+	CListCtrl _list_ctrl_output;
 	afx_msg void OnClose();
+	
+public: 
+	SOCKET sClient = INVALID_SOCKET;
+	CComboBox _combox1;
+	CComboBox _combox2;
+	CComboBox _combox3;
+	CButton _button_search;
+	afx_msg void OnBnClickedButtonSearch();
+	CDateTimeCtrl _datetimepicker;
 };

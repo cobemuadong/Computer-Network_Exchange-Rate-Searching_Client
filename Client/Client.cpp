@@ -82,9 +82,6 @@ BOOL CClientApp::InitInstance()
 	{
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with OK
-		MainDlg main;
-		m_pMainWnd = &main;
-		INT_PTR nResponse = main.DoModal();
 	}
 	else if (nResponse == IDCANCEL)
 	{
