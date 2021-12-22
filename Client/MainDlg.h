@@ -33,4 +33,5 @@ public:
 	CButton _button_search;
 	afx_msg void OnBnClickedButtonSearch();
 	CDateTimeCtrl _datetimepicker;
+	afx_msg void OnCbnSelchangeCombo1();
 };
