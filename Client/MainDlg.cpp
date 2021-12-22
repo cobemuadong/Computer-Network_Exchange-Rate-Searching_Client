@@ -125,11 +125,6 @@ int mSend(SOCKET& sClient, CString& msg)
 	int bufLen = send(sClient, (char*)&len, sizeof(int), 0);
 	if (bufLen <= 0)
 		return 0;
-	int bytesSent = send(sClient, CStringA(msg), len, 0);
-	if (bytesSent <= 0)
-		return 0;
-	else
-		return bytesSent;
 	int wstr_len = (int)wcslen(msg);
 	int num_chars = WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, NULL, 0, NULL, NULL);
 	CHAR* strTo = new CHAR[num_chars + 1];
