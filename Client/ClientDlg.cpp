@@ -303,9 +303,8 @@ void CClientDlg::OnBnClickedLogin()
 		return;
 	}
 
-	//Send tag	
-	int flag = 0;
-	send(sClient, (char*)&flag, sizeof(int), 0);
+	//Send flag
+	mSend(_T("0"));
 
 	//send username and password
 	if (mSend(_user) == 0)
