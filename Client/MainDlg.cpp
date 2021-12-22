@@ -36,6 +36,7 @@ void MainDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(MainDlg, CDialogEx)
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_SEARCH, &MainDlg::OnBnClickedButtonSearch)
+	ON_CBN_SELCHANGE(IDC_COMBO1, &MainDlg::OnCbnSelchangeCombo1)
 END_MESSAGE_MAP()
 
 
@@ -74,7 +75,7 @@ BOOL MainDlg::OnInitDialog()
 
 	_combox1.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(hFont), TRUE);
 	_combox2.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(hFont), TRUE);
-	_combox3.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(hFont), TRUE); 
+	_combox3.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(hFont), TRUE);
 	_datetimepicker.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(hFont), TRUE);
 
 	_datetimepicker.SetFormat(_T("dd/MM/yyyy"));
@@ -112,7 +113,7 @@ BOOL MainDlg::OnInitDialog()
 	HFONT textFont = CreateFontW(18, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
 		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, sFont);
 	_button_search.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(textFont), TRUE);
-	
+
 	_button_search.SetButtonStyle(BS_DEFPUSHBUTTON);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -213,6 +214,7 @@ UINT GetData(LPVOID param)
 void MainDlg::OnBnClickedButtonSearch()
 {
 	// TODO: Add your control notification handler code here
+	mSend(sClient, _T("2"));
 	CString ms_company;
 	CString ms_type;
 	CString ms_brand;
@@ -250,10 +252,10 @@ void MainDlg::OnBnClickedButtonSearch()
 	for (size_t i = 0; i < n; i++)
 	{
 		mRecv(sClient, mr_company);
-		mRecv(sClient,mr_type);
-		mRecv(sClient,mr_brand);
-		mRecv(sClient,mr_buy);
-		mRecv(sClient,mr_sell);
+		mRecv(sClient, mr_type);
+		mRecv(sClient, mr_brand);
+		mRecv(sClient, mr_buy);
+		mRecv(sClient, mr_sell);
 		_list_ctrl_output.InsertItem(0, mr_company);
 		_list_ctrl_output.InsertItem(1, mr_type);
 		_list_ctrl_output.InsertItem(2, mr_brand);
@@ -262,4 +264,10 @@ void MainDlg::OnBnClickedButtonSearch()
 		_list_ctrl_output.InsertItem(5, mr_company);
 	}*/
 	CWinThread* thread = AfxBeginThread(GetData, this);
+}
+
+
+void MainDlg::OnCbnSelchangeCombo1()
+{
+	// TODO: Add your control notification handler code here
 }
