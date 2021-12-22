@@ -25,7 +25,8 @@ protected:
 	CEdit _edt_rg_re_password;
 public:
 	afx_msg void OnBnClickedRegister();
-	SOCKET sock;
-	int SendMsg(CString& msg);
-	int RecvMsg(char* msg);
+	SOCKET sClient;
+	int mSend(CString msg);
+	int mRecv(CString&StrRecv);
+
 };

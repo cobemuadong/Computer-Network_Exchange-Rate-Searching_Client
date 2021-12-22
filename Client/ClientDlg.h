@@ -49,10 +49,11 @@ public:
 	CButton _button_login;
 	CButton _button_register;
 	CButton _button_connect;
-	int mSend(CString& msg);
-	CString mRecv();
+	int mSend(CString msg);
+	int mRecv(CString&StrRecv);
 	afx_msg void OnClose();
 
+	afx_msg void OnEnChangeEdtUsername();
 };
 
 // your declarations here

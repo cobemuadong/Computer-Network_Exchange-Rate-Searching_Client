@@ -119,15 +119,12 @@ BOOL MainDlg::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-int mSend(SOCKET& sClient, CString& msg)
+int mSend(SOCKET& sClient, CString msg)
 {
-	int len = msg.GetLength();
-	int bufLen = send(sClient, (char*)&len, sizeof(int), 0);
-	if (bufLen <= 0)
-		return 0;
-	int wstr_len = (int)wcslen(msg);
+	int wstr_len = (int)wcslen(msg);	//get length
 	int num_chars = WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, NULL, 0, NULL, NULL);
-	CHAR* strTo = new CHAR[num_chars + 1];
+	char* strTo = new char[num_chars + 1];
+	ZeroMemory(strTo, num_chars + 1);
 	if (strTo)
 	{
 		WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, strTo, num_chars, NULL, NULL);
@@ -142,38 +139,38 @@ int mSend(SOCKET& sClient, CString& msg)
 	return bytesSent;
 }
 
-CString mRecv(SOCKET& sClient)
+int mRecv(SOCKET& sClient, CString& StrRecv)
 {
 	int buffLen;
 	int buffReceived = recv(sClient, (char*)&buffLen, sizeof(int), 0);
 	if (buffReceived < 0)
-		return NULL;
-	buffLen += 1;
-	CHAR* temp = new CHAR[buffLen];
+		return SOCKET_ERROR;
+	char* temp = new char[buffLen + 1];
 	ZeroMemory(temp, buffLen);
 	int bytesReceived = recv(sClient, temp, buffLen, 0);
+	temp[buffLen] = '\0';
 	if (bytesReceived < 0)
 	{
 		delete[]temp;
-		return NULL;
+		return SOCKET_ERROR;
 	}
 	else
 	{
 		int wchar_num = MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), NULL, 0);
 		if (wchar_num <= 0)
-			return NULL;
+			return -1;
 		wchar_t* wstr = new wchar_t[wchar_num + 1];
 		ZeroMemory(wstr, wchar_num);
 		if (!wstr)
 		{
-			return NULL;
+			return -1;
 		}
 		MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), wstr, wchar_num);
 		wstr[wchar_num] = '\0';
-		CString X = wstr;
-		delete[]wstr;
-		delete[]temp;
-		return X;
+		StrRecv = wstr;
+		delete[] wstr;
+		delete[] temp;
+		return bytesReceived;
 	}
 }
 
@@ -198,26 +195,26 @@ void MainDlg::OnBnClickedButtonSearch()
 
 	CTime timeTime;
 	DWORD dwResult = _datetimepicker.GetTime(timeTime);
+	CString ms_date;
 	if (dwResult == GDT_VALID)
 	{
-		CString ms_date;
 		// is it a time-only control, or a date-only control?
 		if ((_datetimepicker.GetStyle() & DTS_TIMEFORMAT) == DTS_TIMEFORMAT)
 			ms_date = timeTime.Format(_T("%X")); //time hh-mm-ss
 		else
 			ms_date = timeTime.Format(_T("%x")); //day mm-dd-yy
-		mSend(sClient, ms_date);
 	}
 	else
 		AfxMessageBox(_T("Time not set!"));
 
-	if (mSend(sClient, ms_company) == 0 || mSend(sClient, ms_type) == 0 || mSend(sClient, ms_brand) == 0)
+	if (mSend(sClient, ms_company) == 0 || mSend(sClient, ms_type) == 0 || mSend(sClient, ms_brand) == 0 || mSend(sClient, ms_date))
 	{
 		MessageBox(_T("Không gửi được\nVui lòng thử lại!"));
 		return;
 	}
-
-	size_t n = _tstoll(mRecv(sClient));
+	CString num;
+	mRecv(sClient, num);
+	size_t n = _tstoll(num);
 	CString mr_company;
 	CString mr_type;
 	CString mr_brand;
@@ -225,11 +222,11 @@ void MainDlg::OnBnClickedButtonSearch()
 	CString mr_sell;
 	for (size_t i = 0; i < n; i++)
 	{
-		mr_company = mRecv(sClient);
-		mr_type = mRecv(sClient);
-		mr_brand = mRecv(sClient);
-		mr_buy = mRecv(sClient);
-		mr_sell = mRecv(sClient);
+		mRecv(sClient, mr_company);
+		mRecv(sClient,mr_type);
+		mRecv(sClient,mr_brand);
+		mRecv(sClient,mr_buy);
+		mRecv(sClient,mr_sell);
 		_list_ctrl_output.InsertItem(0, mr_company);
 		_list_ctrl_output.InsertItem(1, mr_type);
 		_list_ctrl_output.InsertItem(2, mr_brand);

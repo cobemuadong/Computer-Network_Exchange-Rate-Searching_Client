@@ -1,4 +1,4 @@
-// RegisterDlg.cpp : implementation file
+﻿// RegisterDlg.cpp : implementation file
 //
 
 #include "pch.h"
@@ -38,28 +38,59 @@ END_MESSAGE_MAP()
 
 // RegisterDlg message handlers
 
-int	RegisterDlg::SendMsg(CString& msg)
+int RegisterDlg::mSend(CString msg)
 {
-	int len = msg.GetLength();
-	char sendBuff[4096];
-	ZeroMemory(sendBuff, 4096);
-	strcpy_s(sendBuff, CStringA(msg).GetString());
-	//Maybe send length?
-	int BytesSent = send(sock, sendBuff, len, 0);
-	if (BytesSent < 0)
+	int wstr_len = (int)wcslen(msg);	//get length
+	int num_chars = WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, NULL, 0, NULL, NULL);
+	char* strTo = new char[num_chars + 1];
+	ZeroMemory(strTo, num_chars + 1);
+	if (strTo)
+	{
+		WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, strTo, num_chars, NULL, NULL);
+		strTo[num_chars] = '\0';
+	}
+	int buffSent = send(sClient, (char*)&num_chars, sizeof(int), 0);
+	if (buffSent <= 0)
 		return 0;
-	return 1;
+	int bytesSent = send(sClient, strTo, num_chars, 0);
+	if (bytesSent <= 0)
+		return 0;
+	return bytesSent;
 }
 
-int RegisterDlg::RecvMsg(char* msg)
+int RegisterDlg::mRecv(CString& StrRecv)
 {
-	msg = new char[4096];
-	int bytesReceived = recv(sock, msg, 4096, 0);
-	delete[]msg;
-	if (bytesReceived == SOCKET_ERROR)
-		return 0;
+	int buffLen;
+	int buffReceived = recv(sClient, (char*)&buffLen, sizeof(int), 0);
+	if (buffReceived < 0)
+		return SOCKET_ERROR;
+	char* temp = new char[buffLen + 1];
+	ZeroMemory(temp, buffLen);
+	int bytesReceived = recv(sClient, temp, buffLen, 0);
+	temp[buffLen] = '\0';
+	if (bytesReceived < 0)
+	{
+		delete[]temp;
+		return SOCKET_ERROR;
+	}
 	else
-		return 1;
+	{
+		int wchar_num = MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), NULL, 0);
+		if (wchar_num <= 0)
+			return -1;
+		wchar_t* wstr = new wchar_t[wchar_num + 1];
+		ZeroMemory(wstr, wchar_num);
+		if (!wstr)
+		{
+			return -1;
+		}
+		MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), wstr, wchar_num);
+		wstr[wchar_num] = '\0';
+		StrRecv = wstr;
+		delete[] wstr;
+		delete[] temp;
+		return bytesReceived;
+	}
 }
 
 void RegisterDlg::OnBnClickedRegister()
@@ -77,17 +108,22 @@ void RegisterDlg::OnBnClickedRegister()
 	bool check = false;
 	if (input_password.Compare(input_re_password) == 0)
 	{
-		check = true;
+		mSend(input_user);
+		mSend(input_password);
+		CString isRegis;
+		mRecv(isRegis);
+		if (isRegis.Compare(_T("1")) == 0)
+		{
+			MessageBox(_T("Đăng ký thành công!"));
+			EndDialog(0);
+		}
+		else
+		{
+			MessageBox(_T("Username đã tồn tại"));
+		}
 	}
 	else
 	{
 		MessageBox(_T("Please check you Re-Password again!"), ERROR);
-	}
-	if (check == true)
-	{
-		//To do
-		SendMsg(input_user);
-		SendMsg(input_password);
-		EndDialog(0);
 	}
 }
