@@ -247,10 +247,10 @@ int CClientDlg::mSend(CString msg)
 	}
 	int buffSent = send(sClient, (char*)&num_chars, sizeof(int), 0);
 	if (buffSent <= 0)
-		return 0;
+		return buffSent;
 	int bytesSent = send(sClient, strTo, num_chars, 0);
 	if (bytesSent <= 0)
-		return 0;
+		return bytesSent;
 	return bytesSent;
 }
 

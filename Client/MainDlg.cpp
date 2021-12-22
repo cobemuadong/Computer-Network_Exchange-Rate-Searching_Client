@@ -183,6 +183,33 @@ void MainDlg::OnClose()
 	CDialogEx::OnClose();
 }
 
+UINT GetData(LPVOID param)
+{
+	MainDlg* ptr = (MainDlg*)param;
+	CString num;
+	mRecv(ptr->sClient, num);
+	size_t n = _tstoll(num);
+	CString mr_company;
+	CString mr_type;
+	CString mr_brand;
+	CString mr_buy;
+	CString mr_sell;
+	for (size_t i = 0; i < n; i++)
+	{
+		mRecv(ptr->sClient, mr_company);
+		mRecv(ptr->sClient, mr_type);
+		mRecv(ptr->sClient, mr_brand);
+		mRecv(ptr->sClient, mr_buy);
+		mRecv(ptr->sClient, mr_sell);
+		ptr->_list_ctrl_output.InsertItem(0, mr_company);
+		ptr->_list_ctrl_output.InsertItem(1, mr_type);
+		ptr->_list_ctrl_output.InsertItem(2, mr_brand);
+		ptr->_list_ctrl_output.InsertItem(3, mr_buy);
+		ptr->_list_ctrl_output.InsertItem(4, mr_sell);
+		ptr->_list_ctrl_output.InsertItem(5, mr_company);
+	}
+	return 0;
+}
 
 void MainDlg::OnBnClickedButtonSearch()
 {
@@ -214,7 +241,7 @@ void MainDlg::OnBnClickedButtonSearch()
 		MessageBox(_T("Không gửi được\nVui lòng thử lại!"));
 		return;
 	}
-	CString num;
+	/*CString num;
 	mRecv(sClient, num);
 	size_t n = _tstoll(num);
 	CString mr_company;
@@ -235,7 +262,8 @@ void MainDlg::OnBnClickedButtonSearch()
 		_list_ctrl_output.InsertItem(3, mr_buy);
 		_list_ctrl_output.InsertItem(4, mr_sell);
 		_list_ctrl_output.InsertItem(5, mr_company);
-	}
+	}*/
+	CWinThread* thread = AfxBeginThread(GetData, this);
 }
 
 
