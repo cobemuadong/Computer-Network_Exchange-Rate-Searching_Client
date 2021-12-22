@@ -93,7 +93,6 @@ int RegisterDlg::mRecv(CString& StrRecv)
 	}
 }
 
-
 void RegisterDlg::OnBnClickedRegister()
 {
 	// TODO: Add your control notification handler code here
