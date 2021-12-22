@@ -140,6 +140,8 @@ void RegisterDlg::OnBnClickedRegister()
 	if (check == true)
 	{
 		//To do
+		int flag = 1;
+		send(sClient, (char*)&flag, sizeof(int), 0);
 		mSend(input_user);
 		mSend(input_password);
 		EndDialog(0);
