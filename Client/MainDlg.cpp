@@ -202,12 +202,12 @@ void MainDlg::OnBnClickedButtonSearch()
 		if ((_datetimepicker.GetStyle() & DTS_TIMEFORMAT) == DTS_TIMEFORMAT)
 			ms_date = timeTime.Format(_T("%X")); //time hh-mm-ss
 		else
-			ms_date = timeTime.Format(_T("%x")); //day mm-dd-yy
+			ms_date = timeTime.Format(_T("%Y%m%d")); //day mm-dd-yy
 	}
 	else
 		AfxMessageBox(_T("Time not set!"));
 
-	if (mSend(sClient, ms_company) == 0 || mSend(sClient, ms_type) == 0 || mSend(sClient, ms_brand) == 0 || mSend(sClient, ms_date))
+	if (mSend(sClient, ms_company) == 0 || mSend(sClient, ms_type) == 0 || mSend(sClient, ms_brand) == 0 || mSend(sClient, ms_date) == 0)
 	{
 		MessageBox(_T("Không gửi được\nVui lòng thử lại!"));
 		return;
