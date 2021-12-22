@@ -22,12 +22,12 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 // Implementation
@@ -78,6 +78,7 @@ BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_REGISTER, &CClientDlg::OnBnClickedRegister)
 	ON_BN_CLICKED(IDC_CONNECT, &CClientDlg::OnBnClickedConnect)
 	ON_WM_CLOSE()
+	ON_EN_CHANGE(IDC_EDT_USERNAME, &CClientDlg::OnEnChangeEdtUsername)
 END_MESSAGE_MAP()
 
 
@@ -172,7 +173,7 @@ HCURSOR CClientDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET&sock)
+bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET& sock)
 {							// Listening port
 	// Initialize winsock
 	WSAData wsaData;	// Winsock auto implement this data by the version we passed (ver)
@@ -226,20 +227,16 @@ bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET&sock)
 	// Do-while loop to send and receive data
 
 	// Gracefully close down everything
-	
+
 	//closesocket(sock);
 	//WSACleanup();
 
 	return true;
 }
 
-int CClientDlg::mSend(CString& msg)
+int CClientDlg::mSend(CString msg)
 {
-	int len = msg.GetLength();
-	int bufLen = send(sClient, (char*)&len, sizeof(int), 0);
-	if (bufLen <= 0)
-		return 0;
-	int wstr_len = (int)wcslen(msg);
+	int wstr_len = (int)wcslen(msg);	//get length
 	int num_chars = WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, NULL, 0, NULL, NULL);
 	CHAR* strTo = new CHAR[num_chars + 1];
 	if (strTo)
@@ -247,7 +244,7 @@ int CClientDlg::mSend(CString& msg)
 		WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, strTo, num_chars, NULL, NULL);
 		strTo[num_chars] = '\0';
 	}
-	int buffSent=send(sClient, (char*)&num_chars, sizeof(int), 0);
+	int buffSent = send(sClient, (char*)&num_chars, sizeof(int), 0);
 	if (buffSent <= 0)
 		return 0;
 	int bytesSent = send(sClient, strTo, num_chars, 0);
@@ -285,8 +282,8 @@ CString CClientDlg::mRecv()
 		MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), wstr, wchar_num);
 		wstr[wchar_num] = '\0';
 		CString X = wstr;
-		delete[]wstr;
-		delete[]temp;
+		delete[] wstr;
+		delete[] temp;
 		return X;
 	}
 }
@@ -306,7 +303,11 @@ void CClientDlg::OnBnClickedLogin()
 		return;
 	}
 
-	//Send tag
+	//Send tag	
+	int flag = 0;
+	send(sClient, (char*)&flag, sizeof(int), 0);
+
+	//send username and password
 	if (mSend(_user) == 0)
 	{
 		AfxMessageBox(_T("Cannot connect to server! "));
@@ -329,8 +330,10 @@ void CClientDlg::OnBnClickedLogin()
 		_button_connect.EnableWindow(TRUE);
 		return;
 	}
+
+	//nhan tin hieu tu Server
 	CString isLogin = mRecv();
-	if (isLogin == _T("Lê Văn Đạt"))
+	if (isLogin == _T("1"))
 	{
 		MainDlg main;
 		main.sClient = sClient;
@@ -349,7 +352,7 @@ void CClientDlg::OnBnClickedRegister()
 {
 	// TODO: Add your control notification handler code here
 	RegisterDlg rgt;
-	rgt.sock = sClient;
+	rgt.sClient = sClient;
 	rgt.DoModal();
 }
 
@@ -365,7 +368,7 @@ void CClientDlg::OnBnClickedConnect()
 	//Convert to tchar
 	/*TCHAR* IP = new TCHAR[temp.GetLength() + 1];
 	_tcscpy_s(IP, temp.GetLength() + 1, temp);*/
-	
+
 	// Convert to char*
 	CStringA temp(ip_temp);
 	const char* ip = temp;
@@ -376,7 +379,7 @@ void CClientDlg::OnBnClickedConnect()
 	{
 		if (sClient == INVALID_SOCKET)
 		{
-			MessageBox(_T("Cannot connect to server! Please try again"),_T("Error"));
+			MessageBox(_T("Cannot connect to server! Please try again"), _T("Error"));
 		}
 		else
 		{
@@ -396,4 +399,15 @@ void CClientDlg::OnClose()
 	// TODO: Add your message handler code here and/or call default
 	closesocket(sClient);
 	CDialogEx::OnClose();
+}
+
+
+void CClientDlg::OnEnChangeEdtUsername()
+{
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the CDialogEx::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
 }

@@ -45,21 +45,75 @@ int	RegisterDlg::SendMsg(CString& msg)
 	ZeroMemory(sendBuff, 4096);
 	strcpy_s(sendBuff, CStringA(msg).GetString());
 	//Maybe send length?
-	int BytesSent = send(sock, sendBuff, len, 0);
+	int BytesSent = send(sClient, sendBuff, len, 0);
 	if (BytesSent < 0)
 		return 0;
 	return 1;
 }
 
+int RegisterDlg::mSend(CString msg)
+{
+	int wstr_len = (int)wcslen(msg);	//get length
+	int num_chars = WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, NULL, 0, NULL, NULL);
+	CHAR* strTo = new CHAR[num_chars + 1];
+	if (strTo)
+	{
+		WideCharToMultiByte(CP_UTF8, 0, msg, wstr_len, strTo, num_chars, NULL, NULL);
+		strTo[num_chars] = '\0';
+	}
+	int buffSent = send(sClient, (char*)&num_chars, sizeof(int), 0);
+	if (buffSent <= 0)
+		return 0;
+	int bytesSent = send(sClient, strTo, num_chars, 0);
+	if (bytesSent <= 0)
+		return 0;
+	return bytesSent;
+}
+
 int RegisterDlg::RecvMsg(char* msg)
 {
 	msg = new char[4096];
-	int bytesReceived = recv(sock, msg, 4096, 0);
+	int bytesReceived = recv(sClient, msg, 4096, 0);
 	delete[]msg;
 	if (bytesReceived == SOCKET_ERROR)
 		return 0;
 	else
 		return 1;
+}
+
+CString RegisterDlg::mRecv()
+{
+	int buffLen;
+	int buffReceived = recv(sClient, (char*)&buffLen, sizeof(int), 0);
+	if (buffReceived < 0)
+		return NULL;
+	buffLen += 1;
+	CHAR* temp = new CHAR[buffLen];
+	ZeroMemory(temp, buffLen);
+	int bytesReceived = recv(sClient, temp, buffLen, 0);
+	if (bytesReceived < 0)
+	{
+		delete[]temp;
+		return NULL;
+	}
+	else
+	{
+		int wchar_num = MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), NULL, 0);
+		if (wchar_num <= 0)
+			return NULL;
+		wchar_t* wstr = new wchar_t[wchar_num + 1];
+		ZeroMemory(wstr, wchar_num);
+		if (!wstr)
+		{
+			return NULL;
+		}
+		MultiByteToWideChar(CP_UTF8, 0, temp, strlen(temp), wstr, wchar_num);
+		wstr[wchar_num] = '\0';
+		CString X = wstr;
+		delete[] wstr;
+		delete[] temp;
+		return X;
+	}
 }
 
 void RegisterDlg::OnBnClickedRegister()
@@ -86,8 +140,8 @@ void RegisterDlg::OnBnClickedRegister()
 	if (check == true)
 	{
 		//To do
-		SendMsg(input_user);
-		SendMsg(input_password);
+		mSend(input_user);
+		mSend(input_password);
 		EndDialog(0);
 	}
 }
