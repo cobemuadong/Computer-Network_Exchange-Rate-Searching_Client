@@ -78,7 +78,6 @@ BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_REGISTER, &CClientDlg::OnBnClickedRegister)
 	ON_BN_CLICKED(IDC_CONNECT, &CClientDlg::OnBnClickedConnect)
 	ON_WM_CLOSE()
-	ON_EN_CHANGE(IDC_EDT_USERNAME, &CClientDlg::OnEnChangeEdtUsername)
 END_MESSAGE_MAP()
 
 
@@ -176,7 +175,6 @@ HCURSOR CClientDlg::OnQueryDragIcon()
 bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET& sock)
 {							// Listening port
 	// Initialize winsock
-	WSAData wsaData;	// Winsock auto implement this data by the version we passed (ver)
 	WORD ver = MAKEWORD(2, 2);	//version 
 	int wsResult = WSAStartup(ver, &wsaData);
 	if (wsResult != 0)
@@ -200,7 +198,6 @@ bool CClientDlg::InitialSocket(const char* ipAddress, int port, SOCKET& sock)
 	}
 
 	// Fill in a hint structure
-	sockaddr_in hint;
 	hint.sin_family = AF_INET;			// TCP
 	hint.sin_port = htons(port);		// host (byte order) to network (byte order) short	
 	int iResult = inet_pton(AF_INET, ipAddress, &hint.sin_addr);// Convert string to IP Address(numeric binary form) (inet_pton)
@@ -329,6 +326,8 @@ void CClientDlg::OnBnClickedLogin()
 	if (isLogin.Compare(_T("1")) == 0)
 	{
 		MainDlg main;
+		main.wsaData = wsaData;
+		main.hint = hint;
 		main.sClient = sClient;
 		theApp.m_pMainWnd = &main;
 		EndDialog(0);
@@ -395,12 +394,3 @@ void CClientDlg::OnClose()
 }
 
 
-void CClientDlg::OnEnChangeEdtUsername()
-{
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the CDialogEx::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
-}
