@@ -78,7 +78,6 @@ BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_REGISTER, &CClientDlg::OnBnClickedRegister)
 	ON_BN_CLICKED(IDC_CONNECT, &CClientDlg::OnBnClickedConnect)
 	ON_WM_CLOSE()
-	ON_EN_CHANGE(IDC_EDT_USERNAME, &CClientDlg::OnEnChangeEdtUsername)
 END_MESSAGE_MAP()
 
 
@@ -395,12 +394,3 @@ void CClientDlg::OnClose()
 }
 
 
-void CClientDlg::OnEnChangeEdtUsername()
-{
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the CDialogEx::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
-}

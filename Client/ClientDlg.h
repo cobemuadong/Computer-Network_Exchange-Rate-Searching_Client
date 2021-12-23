@@ -54,7 +54,6 @@ public:
 	int mRecv(CString&StrRecv);
 	afx_msg void OnClose();
 
-	afx_msg void OnEnChangeEdtUsername();
 };
 
 // your declarations here
