@@ -194,6 +194,7 @@ UINT GetData(LPVOID param)
 	CString mr_brand;
 	CString mr_buy;
 	CString mr_sell;
+	int i = 0;
 	while (true)
 	{
 		mRecv(ptr->sClient, num);
@@ -205,11 +206,12 @@ UINT GetData(LPVOID param)
 		mRecv(ptr->sClient, mr_brand);
 		mRecv(ptr->sClient, mr_buy);
 		mRecv(ptr->sClient, mr_sell);
-		ptr->_list_ctrl_output.InsertItem(0, mr_company);
-		ptr->_list_ctrl_output.InsertItem(1, mr_type);
-		ptr->_list_ctrl_output.InsertItem(2, mr_brand);
-		ptr->_list_ctrl_output.InsertItem(3, mr_buy);
-		ptr->_list_ctrl_output.InsertItem(4, mr_sell);
+		ptr->_list_ctrl_output.InsertItem(i, mr_company);
+		ptr->_list_ctrl_output.SetItemText(i,1, mr_type);
+		ptr->_list_ctrl_output.SetItemText(i,2, mr_brand);
+		ptr->_list_ctrl_output.SetItemText(i,3, mr_buy);
+		ptr->_list_ctrl_output.SetItemText(i,4, mr_sell);
+		i++;
 	}
 	return 0;
 }
