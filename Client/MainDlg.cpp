@@ -216,6 +216,7 @@ UINT GetData(LPVOID param)
 void MainDlg::OnBnClickedButtonSearch()
 {
 	// TODO: Add your control notification handler code here
+	_list_ctrl_output.DeleteAllItems();
 	mSend(sClient, _T("2"));
 	CString ms_company;
 	CString ms_type;
@@ -266,6 +267,7 @@ void MainDlg::OnBnClickedButtonSearch()
 		_list_ctrl_output.InsertItem(5, mr_company);
 	}*/
 	CWinThread* thread = AfxBeginThread(GetData, this);
+	
 }
 
 
