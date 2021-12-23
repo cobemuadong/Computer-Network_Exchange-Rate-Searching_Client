@@ -187,7 +187,6 @@ UINT GetData(LPVOID param)
 {
 	MainDlg* ptr = (MainDlg*)param;
 	CString num;
-	//mRecv(ptr->sClient, num);
 	size_t n = _tstoll(num);
 	CString mr_company;
 	CString mr_type;
