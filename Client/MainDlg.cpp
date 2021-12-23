@@ -187,15 +187,19 @@ UINT GetData(LPVOID param)
 {
 	MainDlg* ptr = (MainDlg*)param;
 	CString num;
-	mRecv(ptr->sClient, num);
+	//mRecv(ptr->sClient, num);
 	size_t n = _tstoll(num);
 	CString mr_company;
 	CString mr_type;
 	CString mr_brand;
 	CString mr_buy;
 	CString mr_sell;
-	for (size_t i = 0; i < n; i++)
+	while (true)
 	{
+		mRecv(ptr->sClient, num);
+		if (num.Compare(_T("1")) != 0)
+			break;
+
 		mRecv(ptr->sClient, mr_company);
 		mRecv(ptr->sClient, mr_type);
 		mRecv(ptr->sClient, mr_brand);
@@ -206,7 +210,6 @@ UINT GetData(LPVOID param)
 		ptr->_list_ctrl_output.InsertItem(2, mr_brand);
 		ptr->_list_ctrl_output.InsertItem(3, mr_buy);
 		ptr->_list_ctrl_output.InsertItem(4, mr_sell);
-		ptr->_list_ctrl_output.InsertItem(5, mr_company);
 	}
 	return 0;
 }
