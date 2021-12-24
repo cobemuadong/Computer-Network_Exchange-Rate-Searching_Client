@@ -203,6 +203,15 @@ UINT GetData(LPVOID param)
 	while (true)
 	{
 		mRecv(ptr->sClient, num);
+
+		//server khong tim thay du lieu
+		if (num.Compare(_T("0")) == 0)
+		{
+			//do something
+			MessageBox(NULL, _T("Không tìm thấy dữ liệu!"), _T("Thông báo"), MB_ICONINFORMATION);
+			break;
+		}
+
 		if (num.Compare(_T("1")) != 0)
 			break;
 
@@ -212,10 +221,10 @@ UINT GetData(LPVOID param)
 		mRecv(ptr->sClient, mr_buy);
 		mRecv(ptr->sClient, mr_sell);
 		ptr->_list_ctrl_output.InsertItem(i, mr_company);
-		ptr->_list_ctrl_output.SetItemText(i,1, mr_type);
-		ptr->_list_ctrl_output.SetItemText(i,2, mr_brand);
-		ptr->_list_ctrl_output.SetItemText(i,3, mr_buy);
-		ptr->_list_ctrl_output.SetItemText(i,4, mr_sell);
+		ptr->_list_ctrl_output.SetItemText(i, 1, mr_type);
+		ptr->_list_ctrl_output.SetItemText(i, 2, mr_brand);
+		ptr->_list_ctrl_output.SetItemText(i, 3, mr_buy);
+		ptr->_list_ctrl_output.SetItemText(i, 4, mr_sell);
 		i++;
 	}
 	return 0;
@@ -281,7 +290,7 @@ void MainDlg::OnBnClickedButtonSearch()
 		_list_ctrl_output.InsertItem(5, mr_company);
 	}*/
 	CWinThread* thread = AfxBeginThread(GetData, this);
-	
+
 }
 
 
