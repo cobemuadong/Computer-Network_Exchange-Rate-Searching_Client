@@ -193,11 +193,9 @@ UINT GetData(LPVOID param)
 	CString mr_brand;
 	CString mr_buy;
 	CString mr_sell;
-	int i = 0;
+	int i = 0, bytes_received;
 	while (true)
 	{
-		mRecv(ptr->sClient, num);
-
 		//server khong tim thay du lieu
 		if (num.Compare(_T("0")) == 0)
 		{
@@ -205,21 +203,22 @@ UINT GetData(LPVOID param)
 			MessageBox(NULL, _T("Không tìm thấy dữ liệu!"), _T("Thông báo"), MB_ICONINFORMATION);
 			break;
 		}
-
-		if (num.Compare(_T("1")) != 0)
+		else if (num.Compare(_T("1")) == 0)
+		{
+			mRecv(ptr->sClient, mr_company);
+			mRecv(ptr->sClient, mr_type);
+			mRecv(ptr->sClient, mr_brand);
+			mRecv(ptr->sClient, mr_buy);
+			mRecv(ptr->sClient, mr_sell);
+			ptr->_list_ctrl_output.InsertItem(i, mr_company);
+			ptr->_list_ctrl_output.SetItemText(i, 1, mr_type);
+			ptr->_list_ctrl_output.SetItemText(i, 2, mr_brand);
+			ptr->_list_ctrl_output.SetItemText(i, 3, mr_buy);
+			ptr->_list_ctrl_output.SetItemText(i, 4, mr_sell);
+			i++;
+		}
+		else
 			break;
-
-		mRecv(ptr->sClient, mr_company);
-		mRecv(ptr->sClient, mr_type);
-		mRecv(ptr->sClient, mr_brand);
-		mRecv(ptr->sClient, mr_buy);
-		mRecv(ptr->sClient, mr_sell);
-		ptr->_list_ctrl_output.InsertItem(i, mr_company);
-		ptr->_list_ctrl_output.SetItemText(i, 1, mr_type);
-		ptr->_list_ctrl_output.SetItemText(i, 2, mr_brand);
-		ptr->_list_ctrl_output.SetItemText(i, 3, mr_buy);
-		ptr->_list_ctrl_output.SetItemText(i, 4, mr_sell);
-		i++;
 	}
 	return 0;
 }
@@ -250,7 +249,7 @@ void MainDlg::OnBnClickedButtonSearch()
 	else
 		AfxMessageBox(_T("Time not set!"));
 
-	if (mSend(sClient, ms_company) == 0 || mSend(sClient, ms_type) == 0 || mSend(sClient, ms_brand) == 0 || mSend(sClient, ms_date) == 0)
+	if (mSend(sClient, ms_company) <= 0 || mSend(sClient, ms_type) <= 0 || mSend(sClient, ms_brand) <= 0 || mSend(sClient, ms_date) <= 0)
 	{
 		MessageBox(_T("Không gửi được\nVui lòng thử lại!"));
 		return;
