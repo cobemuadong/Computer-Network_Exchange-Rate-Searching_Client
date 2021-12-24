@@ -202,6 +202,7 @@ UINT GetData(LPVOID param)
 	int i = 0, bytes_received;
 	while (true)
 	{
+		mRecv(ptr->sClient, num);
 		//server khong tim thay du lieu
 		if (num.Compare(_T("0")) == 0)
 		{
