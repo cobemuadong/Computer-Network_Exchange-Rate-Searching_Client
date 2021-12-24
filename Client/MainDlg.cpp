@@ -30,6 +30,9 @@ void MainDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO3, _combox3);
 	DDX_Control(pDX, IDC_BUTTON_SEARCH, _button_search);
 	DDX_Control(pDX, IDC_DATETIMEPICKER1, _datetimepicker);
+	DDX_Control(pDX, IDC_STATIC1, _static1);
+	DDX_Control(pDX, IDC_STATIC2, _static2);
+	DDX_Control(pDX, IDC_STATIC3, _static3);
 }
 
 
@@ -114,6 +117,10 @@ BOOL MainDlg::OnInitDialog()
 		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, sFont);
 	_button_search.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(textFont), TRUE);
 
+	_static1.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(textFont), TRUE);
+	_static2.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(textFont), TRUE);
+	_static3.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(textFont), TRUE);
+
 	_button_search.SetButtonStyle(BS_DEFPUSHBUTTON);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -187,7 +194,6 @@ UINT GetData(LPVOID param)
 {
 	MainDlg* ptr = (MainDlg*)param;
 	CString num;
-	size_t n = _tstoll(num);
 	CString mr_company;
 	CString mr_type;
 	CString mr_brand;
@@ -234,6 +240,12 @@ void MainDlg::OnBnClickedButtonSearch()
 	_combox1.GetWindowTextW(ms_company);
 	_combox2.GetWindowTextW(ms_type);
 	_combox3.GetWindowTextW(ms_brand);
+
+	if (ms_company.Compare(_T("Công ty")) == 0 || ms_type.Compare(_T("Loại")) == 0 || ms_brand.Compare(_T("Thương hiệu")) == 0)
+	{
+		AfxMessageBox(_T("Vui lòng điền đầy đủ thông tin!"));
+		return;
+	}
 
 	CTime timeTime;
 	DWORD dwResult = _datetimepicker.GetTime(timeTime);
