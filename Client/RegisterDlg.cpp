@@ -126,6 +126,6 @@ void RegisterDlg::OnBnClickedRegister()
 	}
 	else
 	{
-		MessageBox(_T("Please check you Re-Password again!"), ERROR);
+		MessageBox(_T("Xác nhận mật khẩu không chính xác!"), ERROR);
 	}
 }

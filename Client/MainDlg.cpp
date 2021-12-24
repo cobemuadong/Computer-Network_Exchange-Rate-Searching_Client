@@ -70,10 +70,10 @@ BOOL MainDlg::OnInitDialog()
 	this->ScreenToClient(&rect);
 	int width = rect.Width() / 5;
 
-	_list_ctrl_output.InsertColumn(0, _T("Bán ra"), LVCFMT_LEFT, width);
-	_list_ctrl_output.InsertColumn(0, _T("Mua vào"), LVCFMT_LEFT, width);
-	_list_ctrl_output.InsertColumn(0, _T("Hãng"), LVCFMT_LEFT, width);
-	_list_ctrl_output.InsertColumn(0, _T("Loại"), LVCFMT_LEFT, width + 40);
+	_list_ctrl_output.InsertColumn(0, _T("Bán ra"), LVCFMT_LEFT, width - 20);
+	_list_ctrl_output.InsertColumn(0, _T("Mua vào"), LVCFMT_LEFT, width - 20);
+	_list_ctrl_output.InsertColumn(0, _T("Hãng"), LVCFMT_LEFT, width + 40);
+	_list_ctrl_output.InsertColumn(0, _T("Loại"), LVCFMT_LEFT, width);
 	_list_ctrl_output.InsertColumn(0, _T("Công ty"), LVCFMT_LEFT, width - 40);
 
 	_combox1.SendMessageW(WM_SETFONT, reinterpret_cast<WPARAM>(hFont), TRUE);
@@ -202,6 +202,7 @@ UINT GetData(LPVOID param)
 	int i = 0, bytes_received;
 	while (true)
 	{
+		mRecv(ptr->sClient, num);
 		//server khong tim thay du lieu
 		if (num.Compare(_T("0")) == 0)
 		{
