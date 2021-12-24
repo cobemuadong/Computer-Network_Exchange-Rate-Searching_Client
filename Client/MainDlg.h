@@ -36,4 +36,7 @@ public:
 	afx_msg void OnBnClickedButtonSearch();
 	CDateTimeCtrl _datetimepicker;
 	afx_msg void OnCbnSelchangeCombo1();
+	CStatic _static1;
+	CStatic _static2;
+	CStatic _static3;
 };
