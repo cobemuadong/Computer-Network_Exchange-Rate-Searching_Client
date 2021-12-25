@@ -105,15 +105,38 @@ void RegisterDlg::OnBnClickedRegister()
 	_edt_rg_password.GetWindowText(input_password);
 	_edt_rg_re_password.GetWindowText(input_re_password);
 
-	mSend(_T("1"));
+	int iResult = mSend(_T("1"));
+	if (iResult <= 0)
+	{
+		MessageBox(_T("Mất kết nối đến server!"));
+		return;
+	}
 
 	bool check = false;
 	if (input_password.Compare(input_re_password) == 0)
 	{
-		mSend(input_user);
-		mSend(input_password);
+		iResult = mSend(input_user);
+		if (iResult <= 0)
+		{
+			MessageBox(_T("Mất kết nối đến server!"));
+			return;
+		}
+		iResult = mSend(input_password);
+		if (iResult <= 0)
+		{
+			MessageBox(_T("Mất kết nối đến server!"));
+			return;
+		}
 		CString isRegis;
-		mRecv(isRegis);
+		iResult=mRecv(isRegis);
+		if (iResult <= 0)
+		{
+			if (iResult < 0)
+				MessageBox(_T("Nhận thông điệp thất bại!"));
+			else
+				MessageBox(_T("Mất kết nối đến server!"));
+			return;
+		}
 		if (isRegis.Compare(_T("1")) == 0)
 		{
 			MessageBox(_T("Đăng ký thành công!"));

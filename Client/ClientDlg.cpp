@@ -114,7 +114,7 @@ BOOL CClientDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	GetDlgItem(IDC_IP)->SetWindowTextW(_T("127.0.0.1"));
-	GetDlgItem(IDC_EDT_PORT)->SetWindowTextW(_T("1234"));
+	GetDlgItem(IDC_EDT_PORT)->SetWindowTextW(_T("2831"));
 
 	_button_login.EnableWindow(FALSE);
 	_button_register.EnableWindow(FALSE);
@@ -298,31 +298,51 @@ void CClientDlg::OnBnClickedLogin()
 
 	if (_user == "" || _pass == "")
 	{
+		AfxMessageBox(_T("Vui lòng nhập đầy đủ thông tin!"));
 		return;
 	}
 
 	//Send tag	
 	int flag = 0;
-	mSend(_T("0"));
-	
-	//send username and password
-	int userSent = mSend(_user);
-	int passSent = mSend(_pass);
-	if (userSent <= 0 || passSent <= 0)
+	int iResult = mSend(_T("0"));
+	if (iResult == SOCKET_ERROR)
 	{
-		AfxMessageBox(_T("Cannot connect to server! "));
 		GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Connect"));
 		_ip_address.EnableWindow(TRUE);
 		_edt_port.EnableWindow(TRUE);
 		_button_login.EnableWindow(FALSE);
 		_button_register.EnableWindow(FALSE);
 		_button_connect.EnableWindow(TRUE);
+		MessageBox(_T("Mất kết nối đến server!"));
+	}
+	
+	//send username and password
+	int userSent = mSend(_user);
+	int passSent = mSend(_pass);
+	if (userSent <= 0 || passSent == 0)
+	{
+		GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Connect"));
+		_ip_address.EnableWindow(TRUE);
+		_edt_port.EnableWindow(TRUE);
+		_button_login.EnableWindow(FALSE);
+		_button_register.EnableWindow(FALSE);
+		_button_connect.EnableWindow(TRUE);
+		MessageBox(_T("Mất kết nối đến server"));
 		return;
 	}
 
 	//nhan tin hieu tu Server
 	CString isLogin;
-	mRecv(isLogin);
+	iResult = mRecv(isLogin);
+	if (iResult <= 0)
+	{
+		if (iResult < 0)
+			MessageBox(_T("Gửi thông điệp thất bại!"));
+		else
+			MessageBox(_T("Mất kết nối đến server!"));
+		return;
+	}
+
 	if (isLogin.Compare(_T("1")) == 0)
 	{
 		MainDlg main;

@@ -87,7 +87,7 @@ BOOL MainDlg::OnInitDialog()
 	GetDlgItem(IDC_COMBO2)->SetWindowTextW(_T("Loại"));
 	GetDlgItem(IDC_COMBO3)->SetWindowTextW(_T("Thương hiệu"));
 
-	vector<CString> company = { _T("SJC"),_T("DOJI"),_T("3BANKS"),_T("2GROUP"),_T("1OTHER"),_T("1Coin"),_T("Tất cả") };
+	vector<CString> company = {_T("DOJI"),_T("3BANKS"),_T("2GROUP"),_T("1OTHER"),_T("1Coin"),_T("Tất cả") };
 	vector<CString>type = { _T("Vàng SJC"),_T("Vàng SJC 1L"),_T("Vàng nhẫn SJC 99,99 0,5 chỉ"),
 		_T("Vàng nhẫn SJC 99,99 1 chỉ, 2 chỉ, 5 chỉ"),_T("Vàng nữ trang 99,99%"),_T("Vàng nữ trang 99%"),
 		_T("Vàng nữ trang 75%"),_T("Vàng nữ trang 58,3%"),_T("Vàng nữ trang 41,7%"),_T("AVPL / DOJI HCM buôn"),
@@ -182,9 +182,29 @@ int mRecv(SOCKET& sClient, CString& StrRecv)
 	}
 }
 
+void closeThread(CWinThread* thread)
+{
+	DWORD exit_code = NULL;
+	if (thread != NULL)
+	{
+		GetExitCodeThread(thread->m_hThread, &exit_code);
+		if (exit_code == STILL_ACTIVE)
+		{
+			::TerminateThread(thread->m_hThread, 0);
+			CloseHandle(thread->m_hThread);
+		}
+		thread->m_hThread = NULL;
+		thread = NULL;
+	}
+}
+
 void MainDlg::OnClose()
 {
 	// TODO: Add your message handler code here and/or call default
+	for (int i = 0; i < id; i++)
+	{
+		closeThread(thread[i]);
+	}
 	shutdown(sClient, 0);
 	closesocket(sClient);
 	CDialogEx::OnClose();
@@ -227,17 +247,22 @@ UINT GetData(LPVOID param)
 		else
 			break;
 	}
+	ptr->id--;
 	return 0;
 }
 
 void MainDlg::OnBnClickedButtonSearch()
 {
 	// TODO: Add your control notification handler code here
+	for (int i = 0; i < id; i++)
+	{
+		closeThread(thread[i]);
+	}
 	_list_ctrl_output.DeleteAllItems();
 	int bytesSent = mSend(sClient, _T("2"));
 	if (bytesSent <= 0)
 	{
-		MessageBox(_T("Mất kết nối với server!"));
+		MessageBox(_T("Mất kết nối đến server!"));
 		return;
 	}
 	CString ms_company;
@@ -269,7 +294,7 @@ void MainDlg::OnBnClickedButtonSearch()
 
 	if (mSend(sClient, ms_company) <= 0 || mSend(sClient, ms_type) <= 0 || mSend(sClient, ms_brand) <= 0 || mSend(sClient, ms_date) <= 0)
 	{
-		MessageBox(_T("Không gửi được\nVui lòng thử lại!"));
+		MessageBox(_T("Không gửi được! Có thể đã mất kết nối\nVui lòng thử lại!"));
 		return;
 	}
 	/*CString num;
@@ -294,8 +319,7 @@ void MainDlg::OnBnClickedButtonSearch()
 		_list_ctrl_output.InsertItem(4, mr_sell);
 		_list_ctrl_output.InsertItem(5, mr_company);
 	}*/
-	CWinThread* thread = AfxBeginThread(GetData, this);
-
+	thread[id++] = AfxBeginThread(GetData, this);
 }
 
 

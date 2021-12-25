@@ -39,4 +39,6 @@ public:
 	CStatic _static1;
 	CStatic _static2;
 	CStatic _static3;
+	CWinThread* thread[10];
+	int id = 0;
 };
