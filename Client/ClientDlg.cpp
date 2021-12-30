@@ -114,7 +114,7 @@ BOOL CClientDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	GetDlgItem(IDC_IP)->SetWindowTextW(_T("127.0.0.1"));
-	GetDlgItem(IDC_EDT_PORT)->SetWindowTextW(_T("1234"));
+	GetDlgItem(IDC_EDT_PORT)->SetWindowTextW(_T("2831"));
 
 	_button_login.EnableWindow(FALSE);
 	_button_register.EnableWindow(FALSE);
