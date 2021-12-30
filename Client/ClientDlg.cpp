@@ -319,7 +319,7 @@ void CClientDlg::OnBnClickedLogin()
 	//send username and password
 	int userSent = mSend(_user);
 	int passSent = mSend(_pass);
-	if (userSent <= 0 || passSent == 0)
+	if (userSent <= 0 || passSent <= 0)
 	{
 		GetDlgItem(IDC_CONNECT)->SetWindowTextW(_T("Connect"));
 		_ip_address.EnableWindow(TRUE);
